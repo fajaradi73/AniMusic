@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">AniMusic</string>
+    <string name="ok">OK</string>
+    <string name="no_internet">Tidak Ada Koneksi Internet</string>
+    <string name="body_internet">Anda harus mengaktifkan Data Seluler atau wifi untuk mengakses ini. Tekan OK untuk mengaktifkan internet</string>
+    <string name="voice">Voice</string>
+    <string name="no_data">Tidak Ada Data</string>
+    <string name="poster">Poster</string>
+    <string name="album">Album</string>
+    <string name="time_default">--:--</string>
+    <string name="online">Online</string>
+    <string name="favorite">Favorite</string>
+    <string name="download">Download</string>
+    <string name="search">Search</string>
+    <string name="settings">Settings</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="random">Random</string>
+    <string name="acak_lagu">Acak Lagu</string>
+
+</resources>

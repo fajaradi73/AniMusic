@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="itemBetweenMargin">4dp</dimen>
+    <dimen name="itemBetweenMarginMedium">6dp</dimen>
+
+    <dimen name="card_corner_radius">5dp</dimen>
+    <dimen name="card_corner_radius2">8dp</dimen>
+    <dimen name="card_corner_radius3">16dp</dimen>
+    <dimen name="activityHorizontalMargin_medium">14dp</dimen>
+    <dimen name="activityHorizontalMargin">16dp</dimen>
+    <dimen name="activityHorizontalMargin_big">36dp</dimen>
+    <dimen name="activityHorizontalMargin_big2">45dp</dimen>
+    <dimen name="activityHorizontalMargin_big3">60dp</dimen>
+    <dimen name="activityVerticalMargin">16dp</dimen>
+    <dimen name="activityVerticalMargin_medium">24dp</dimen>
+    <dimen name="activityVerticalMargin_big">36dp</dimen>
+    <dimen name="activityVerticalMargin_big2">45dp</dimen>
+    <dimen name="menu_icon_bottom">2dp</dimen>
+    <dimen name="elevation_min">-3dp</dimen>
+    <dimen name="inputBottomMedium">18dp</dimen>
+    <dimen name="inputBottomMedium2">24dp</dimen>
+    <dimen name="inputBottomEasy">12dp</dimen>
+    <dimen name="padding_10">10dp</dimen>
+    <dimen name="padding_20">20dp</dimen>
+    <dimen name="height_icon">40dp</dimen>
+    <dimen name="height_image2">150dp</dimen>
+    <dimen name="sliding_search_view_header_height">250dp</dimen>
+</resources>

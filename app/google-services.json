@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "917651082944",
+    "firebase_url": "https://animusic-bbb5f.firebaseio.com",
+    "project_id": "animusic-bbb5f",
+    "storage_bucket": "animusic-bbb5f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:917651082944:android:26fdfab0883903ad36e725",
+        "android_client_info": {
+          "package_name": "id.fajarproject.animusic"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "917651082944-ga5s34h7df79hrrci5ecurkrv4a6ojam.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "id.fajarproject.animusic",
+            "certificate_hash": "128fa87d6d5fc3dc411555bf944f4dc398c0afb2"
+          }
+        },
+        {
+          "client_id": "917651082944-9gm28f0abr2v8vgg0c0dq35b1d01vm66.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCOsnnbEg7YKk6-5gXQ5rE66iiZhgHdAjk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "917651082944-9gm28f0abr2v8vgg0c0dq35b1d01vm66.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
