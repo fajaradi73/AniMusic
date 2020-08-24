@@ -1,36 +1,47 @@
 package id.fajarproject.animusic.data.network.model
 
 import com.google.gson.annotations.SerializedName
+import io.realm.RealmObject
+import io.realm.annotations.PrimaryKey
 
-data class MusicItem(
+open class MusicItem : RealmObject() {
+	@PrimaryKey
+	@field:SerializedName("id")
+	var id: Int? = null
 
 	@field:SerializedName("idmp3")
-	val idMp3: String? = null,
+	var idMp3: String? = null
 
 	@field:SerializedName("link")
-	val link: String? = null,
+	var link: String? = null
 
 	@field:SerializedName("musiccover")
-	val musicCover: String? = null,
+	var musicCover: String? = null
 
 	@field:SerializedName("judulpost")
-	val judulPost: String? = null,
+	var judulPost: String? = null
 
 	@field:SerializedName("cover")
-	val cover: String? = null,
+	var cover: String? = null
 
 	@field:SerializedName("judulmusic")
-	val judulMusic: String? = null,
+	var judulMusic: String? = null
 
 	@field:SerializedName("linkmp3")
-	val linkMp3: String? = null,
-
-	@field:SerializedName("id")
-	val id: Int? = null,
+	var linkMp3: String? = null
 
 	@field:SerializedName("category")
-	val category: String? = null,
+	var category: String? = null
 
 	@field:SerializedName("namaband")
-	val namaBand: String? = null
-)
+	var namaBand: String? = null
+
+	@field:SerializedName("favorite")
+	var favorite: Boolean? = false
+
+	@field:SerializedName("online")
+	var isOnline: Boolean? = true
+
+	@field:SerializedName("createDate")
+	var createDate: Long? = null
+}

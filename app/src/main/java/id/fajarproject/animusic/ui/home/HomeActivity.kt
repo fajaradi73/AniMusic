@@ -1,7 +1,6 @@
 package id.fajarproject.animusic.ui.home
 
 import android.animation.ObjectAnimator
-import android.app.ActivityManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -17,16 +16,18 @@ import android.view.MenuItem
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.LinearInterpolator
+import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.google.android.material.snackbar.Snackbar
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import id.fajarproject.animusic.R
 import id.fajarproject.animusic.data.network.model.MusicItem
 import id.fajarproject.animusic.data.pref.AppPreference
 import id.fajarproject.animusic.data.pref.StoragePreference
+import id.fajarproject.animusic.data.realm.RealmHelper
 import id.fajarproject.animusic.service.MediaPlayerContract
 import id.fajarproject.animusic.service.MediaPlayerService
 import id.fajarproject.animusic.service.MediaPlayerService.LocalBinder
@@ -37,6 +38,7 @@ import id.fajarproject.animusic.ui.online.OnlineFragment
 import id.fajarproject.animusic.ui.settings.SettingsFragment
 import id.fajarproject.animusic.utils.*
 import id.fajarproject.animusic.utils.Constant.Broadcast_PLAY_NEW_AUDIO
+import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_home.*
 import kotlinx.android.synthetic.main.media_player.*
 import javax.inject.Inject
@@ -61,6 +63,10 @@ class HomeActivity : BaseActivity(),HomeContract.View {
     private var previousPosition = -1
     private var listMusic : MutableList<MusicItem?>? = null
 
+    private var realm = Realm.getDefaultInstance()
+    private var realmHelper : RealmHelper? = null
+    private var idMusic     = -1
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
@@ -71,6 +77,7 @@ class HomeActivity : BaseActivity(),HomeContract.View {
         styleIcon(styleMusic)
 
         handler = Handler()
+        realmHelper = RealmHelper(realm)
 
         setUI()
         checkLocal()
@@ -82,8 +89,10 @@ class HomeActivity : BaseActivity(),HomeContract.View {
         previousPosition        = storage.loadAudioIndex() ?: -1
         listMusic               = storage.loadAudio()
         if (listMusic != null && previousPosition != -1){
-            listMusic?.get(previousPosition)?.let { setMusicPlayer(it) }
-            setAction()
+            listMusic?.get(previousPosition)?.let {
+                setMusicPlayer(it)
+                setAction(it)
+            }
         }
     }
 
@@ -137,7 +146,6 @@ class HomeActivity : BaseActivity(),HomeContract.View {
                     newState == SlidingUpPanelLayout.PanelState.DRAGGING){
                     setViewExpand()
                 }else{
-//                    setViewMinimize()
                     slideLayout.panelState = SlidingUpPanelLayout.PanelState.HIDDEN
                 }
             }
@@ -239,7 +247,7 @@ class HomeActivity : BaseActivity(),HomeContract.View {
             }
 
             this.doubleBackToExitPressedOnce = true
-            Snackbar.make(dragView,"Ketuk lagi untuk mendorong apl ke latar belakang",Snackbar.LENGTH_SHORT).show()
+            Toast.makeText(activity,"Ketuk lagi untuk mendorong apl ke latar belakang",Toast.LENGTH_SHORT).show()
 
             Handler().postDelayed({ doubleBackToExitPressedOnce = false }, 2000)
         }
@@ -261,6 +269,13 @@ class HomeActivity : BaseActivity(),HomeContract.View {
             .placeholder(Util.circleLoading(activity))
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .into(ivMinimize)
+
+        // Favorite Music
+        idMusic = item.id ?: -1
+        if (realmHelper?.checkData(idMusic) != false)
+            setIconLike(Constant.ACTION_LIKE)
+        else
+            setIconLike(Constant.ACTION_UNLIKE)
     }
 
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
@@ -316,7 +331,7 @@ class HomeActivity : BaseActivity(),HomeContract.View {
         }
     }
 
-    override fun setAction() {
+    override fun setAction(item: MusicItem) {
         ivPrevious.setOnClickListener {
             if (player != null){
                 player?.setOnAction(Constant.ACTION_PREVIOUS)
@@ -350,6 +365,35 @@ class HomeActivity : BaseActivity(),HomeContract.View {
         ivStyle.setOnClickListener {
             player?.setOnAction(Constant.ACTION_STYLE)
         }
+        ivFavorite.setOnClickListener {
+            if (realmHelper?.checkData(idMusic) != false){
+                if (player != null)
+                    player?.setOnAction(Constant.ACTION_UNLIKE)
+                else
+                    realmHelper?.deleteMusic(idMusic)
+                    setLikeUpdate()
+            }else{
+                if (player != null)
+                    player?.setOnAction(Constant.ACTION_LIKE)
+                else
+                    realmHelper?.save(item)
+                    setLikeUpdate()
+            }
+        }
+    }
+
+    override fun setLikeUpdate() {
+        if (realmHelper?.checkData(idMusic) != false){
+            setIconLike(Constant.ACTION_LIKE)
+            Toast.makeText(this,"Sukses menambahkan lagu ke favorite",Toast.LENGTH_SHORT).show()
+        }else{
+            setIconLike(Constant.ACTION_UNLIKE)
+            Toast.makeText(this,"Sukses menghapus lagu dari favorite",Toast.LENGTH_SHORT).show()
+        }
+        if (currentFragment?.tag == Constant.favorite){
+            val viewFavorite = currentFragment as FavoriteFragment
+            viewFavorite.updateFavorite()
+        }
     }
 
     override fun previousMusic(){
@@ -373,13 +417,13 @@ class HomeActivity : BaseActivity(),HomeContract.View {
     override fun styleIcon(styleMusic : Int) {
         when(styleMusic){
             StyleMusic.LOOPING -> {
-                ivStyle.setImageDrawable(resources.getDrawable(R.drawable.ic_looping,applicationContext.theme))
+                ivStyle.setImageDrawable(ContextCompat.getDrawable(activity,R.drawable.ic_looping))
             }
             StyleMusic.RANDOM -> {
-                ivStyle.setImageDrawable(resources.getDrawable(R.drawable.ic_random,applicationContext.theme))
+                ivStyle.setImageDrawable(ContextCompat.getDrawable(activity,R.drawable.ic_random))
             }
             StyleMusic.REPEAT -> {
-                ivStyle.setImageDrawable(resources.getDrawable(R.drawable.ic_repeat,applicationContext.theme))
+                ivStyle.setImageDrawable(ContextCompat.getDrawable(activity,R.drawable.ic_repeat))
             }
         }
     }
@@ -426,7 +470,10 @@ class HomeActivity : BaseActivity(),HomeContract.View {
     }
 
     override fun playAudio(list: MutableList<MusicItem?>, audioIndex: Int) {
-        list[audioIndex]?.let { setMusicPlayer(it) }
+        list[audioIndex]?.let {
+            setMusicPlayer(it)
+            setAction(it)
+        }
 
         styleMusic  = AppPreference.getIntPreferenceByName(this,Constant.styleMusic)
         styleIcon(styleMusic)
@@ -469,8 +516,8 @@ class HomeActivity : BaseActivity(),HomeContract.View {
                 loadingMusic.max = duration / 1000
                 timeEnd.text = Util.getTime(duration.toLong())
                 updateProgress()
-                ivPlay.setImageDrawable(resources.getDrawable(R.drawable.ic_pause,applicationContext.theme))
-                ivPlayMM.setImageDrawable(resources.getDrawable(R.drawable.ic_pause,applicationContext.theme))
+                ivPlay.setImageDrawable(ContextCompat.getDrawable(activity,R.drawable.ic_pause))
+                ivPlayMM.setImageDrawable(ContextCompat.getDrawable(activity,R.drawable.ic_pause))
             }
 
             override fun onComplete() {
@@ -483,26 +530,24 @@ class HomeActivity : BaseActivity(),HomeContract.View {
             override fun onAction(playbackStatus: PlaybackStatus) {
                 when (playbackStatus) {
                     PlaybackStatus.PAUSED -> {
-                        ivPlay.setImageDrawable(resources.getDrawable(R.drawable.ic_play,applicationContext.theme))
-                        ivPlayMM.setImageDrawable(resources.getDrawable(R.drawable.ic_play,applicationContext.theme))
+                        ivPlay.setImageDrawable(ContextCompat.getDrawable(activity,R.drawable.ic_play))
+                        ivPlayMM.setImageDrawable(ContextCompat.getDrawable(activity,R.drawable.ic_play))
                         anim?.pause()
                     }
                     PlaybackStatus.PLAYING -> {
                         updateProgress()
                         anim?.resume()
-                        ivPlay.setImageDrawable(resources.getDrawable(R.drawable.ic_pause,applicationContext.theme))
-                        ivPlayMM.setImageDrawable(resources.getDrawable(R.drawable.ic_pause,applicationContext.theme))
+                        ivPlay.setImageDrawable(ContextCompat.getDrawable(activity,R.drawable.ic_pause))
+                        ivPlayMM.setImageDrawable(ContextCompat.getDrawable(activity,R.drawable.ic_pause))
                     }
                     PlaybackStatus.STYLE -> {
                         player?.styleMusic?.let { styleIcon(it) }
                     }
                     PlaybackStatus.LIKE -> {
-                        likeAction = Constant.ACTION_LIKE
-                        setIconLike(likeAction)
+                        setLikeUpdate()
                     }
                     PlaybackStatus.UNLIKE ->{
-                        likeAction = Constant.ACTION_UNLIKE
-                        setIconLike(likeAction)
+                        setLikeUpdate()
                     }
                     else -> {}
                 }
@@ -522,14 +567,13 @@ class HomeActivity : BaseActivity(),HomeContract.View {
                 runnable.run()
             }
         }
-        setAction()
     }
 
     override fun setIconLike(likeType: String) {
         if (likeType == Constant.ACTION_LIKE){
-            ivFavorite.setImageDrawable(resources.getDrawable(R.drawable.ic_like,applicationContext.theme))
+            ivFavorite.setImageDrawable(ContextCompat.getDrawable(activity,R.drawable.ic_like))
         }else {
-            ivFavorite.setImageDrawable(resources.getDrawable(R.drawable.ic_unlike,applicationContext.theme))
+            ivFavorite.setImageDrawable(ContextCompat.getDrawable(activity,R.drawable.ic_unlike))
         }
     }
 
@@ -541,15 +585,5 @@ class HomeActivity : BaseActivity(),HomeContract.View {
         anim?.repeatCount = Animation.INFINITE
         anim?.interpolator = LinearInterpolator()
         anim?.start()
-    }
-    private fun isMyServiceRunning(serviceClass: Class<*>): Boolean {
-        val manager =
-            getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-        for (service in manager.getRunningServices(Int.MAX_VALUE)) {
-            if (serviceClass.name == service.service.className) {
-                return true
-            }
-        }
-        return false
     }
 }

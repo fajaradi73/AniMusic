@@ -42,7 +42,7 @@
         android:id="@+id/clMusic">
         <androidx.cardview.widget.CardView
             android:layout_width="wrap_content"
-            android:layout_height="30dp"
+            android:layout_height="25dp"
             android:id="@+id/btnRandom"
             android:layout_margin="@dimen/itemBetweenMarginMedium"
             app:cardCornerRadius="@dimen/padding_10"
@@ -58,8 +58,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/ivRandom"
-                    android:padding="3dp"
-                    android:tint="@color/grey_600"
+                    android:padding="@dimen/itemBetweenMargin"
+                    app:tint="@color/grey_600"
                     android:src="@drawable/ic_random_grey"
                     android:contentDescription="@string/random"
                     app:layout_constraintLeft_toLeftOf="parent"

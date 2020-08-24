@@ -4,11 +4,15 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
-    <com.github.florent37.shapeofview.shapes.CircleView
+    <com.github.florent37.shapeofview.shapes.RoundRectView
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:id="@+id/cvPoster"
         android:layout_margin="@dimen/itemBetweenMarginMedium"
+        app:shape_roundRect_topLeftRadius="@dimen/itemBetweenMarginMedium"
+        app:shape_roundRect_topRightRadius="@dimen/itemBetweenMarginMedium"
+        app:shape_roundRect_bottomLeftRadius="@dimen/itemBetweenMarginMedium"
+        app:shape_roundRect_bottomRightRadius="@dimen/itemBetweenMarginMedium"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent">
@@ -20,7 +24,7 @@
             android:background="@color/grey_300"
             android:src="@drawable/ic_placeholder"
             android:contentDescription="@string/poster" />
-    </com.github.florent37.shapeofview.shapes.CircleView>
+    </com.github.florent37.shapeofview.shapes.RoundRectView>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -48,13 +52,13 @@
             android:layout_height="18dp"
             android:id="@+id/ivAlbum"
             android:src="@drawable/ic_album"
-            android:tint="@color/grey_600"
             android:layout_marginStart="@dimen/itemBetweenMargin"
             app:layout_constraintTop_toBottomOf="@id/tvJudul"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toLeftOf="@id/tvName"
-            android:contentDescription="@string/album" />
+            android:contentDescription="@string/album"
+            app:tint="@color/grey_600" />
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -68,5 +72,14 @@
             app:layout_constraintLeft_toRightOf="@id/ivAlbum"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintBottom_toBottomOf="@id/ivAlbum"/>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="@color/grey_400"
+            android:layout_marginTop="@dimen/itemBetweenMargin"
+            app:layout_constraintTop_toBottomOf="@id/tvName"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

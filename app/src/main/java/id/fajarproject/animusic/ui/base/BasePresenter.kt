@@ -8,7 +8,7 @@ import io.reactivex.disposables.CompositeDisposable
  * Created by Fajar Adi Prasetyo on 05/08/2020.
  */
 
-open class BasePresenter<V : BaseContract.View> : BaseContract.Presenter<V> {
+open class BasePresenter<V> : BaseContract.Presenter<V> {
     val subscriptions = CompositeDisposable()
     val api : ApiServiceInterface = ApiServiceInterface.create()
 

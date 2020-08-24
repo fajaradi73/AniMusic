@@ -35,11 +35,13 @@ import id.fajarproject.animusic.R
 import id.fajarproject.animusic.data.network.model.MusicItem
 import id.fajarproject.animusic.data.pref.AppPreference
 import id.fajarproject.animusic.data.pref.StoragePreference
+import id.fajarproject.animusic.data.realm.RealmHelper
 import id.fajarproject.animusic.di.component.DaggerServiceComponent
 import id.fajarproject.animusic.di.component.ServiceComponent
 import id.fajarproject.animusic.di.module.ServiceModule
 import id.fajarproject.animusic.ui.home.HomeActivity
 import id.fajarproject.animusic.utils.*
+import io.realm.Realm
 import java.io.IOException
 import javax.inject.Inject
 
@@ -85,6 +87,9 @@ class MediaPlayerService : Service(),MediaPlayerContract.View, OnCompletionListe
 
     override var styleMusic = StyleMusic.LOOPING
 
+    private var realm = Realm.getDefaultInstance()
+    private var realmHelper : RealmHelper? = null
+
     // Binder given to clients
     private val iBinder: IBinder = LocalBinder()
     override fun onBind(intent: Intent?): IBinder {
@@ -101,6 +106,9 @@ class MediaPlayerService : Service(),MediaPlayerContract.View, OnCompletionListe
         // Pause MediaPlayer on incoming call,
         // Resume on hangup.
         callStateListener()
+        // Setup Realm
+        realmHelper = RealmHelper(realm)
+
         //ACTION_AUDIO_BECOMING_NOISY -- change in audio outputs -- BroadcastReceiver
         registerBecomingNoisyReceiver()
         //Listen for new Audio to play -- BroadcastReceiver
@@ -191,9 +199,6 @@ class MediaPlayerService : Service(),MediaPlayerContract.View, OnCompletionListe
 
     override fun onCompletion(mp: MediaPlayer?) {
         //Invoked when playback of a media source has completed.
-//        stopMedia()
-//        //stop the service
-//        stopSelf()
         if (styleMusic != StyleMusic.REPEAT){
             callback?.onComplete()
             transportControls?.skipToNext()
@@ -374,6 +379,7 @@ class MediaPlayerService : Service(),MediaPlayerContract.View, OnCompletionListe
 
     override val playNewAudio: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
+            audioList = StoragePreference(applicationContext).loadAudio()
 
             //Get the new media index form SharedPreferences
             audioIndex = StoragePreference(
@@ -381,7 +387,7 @@ class MediaPlayerService : Service(),MediaPlayerContract.View, OnCompletionListe
             ).loadAudioIndex() ?: 0
             if (audioIndex != -1 && audioIndex < audioList?.size ?: 0) {
                 //index is in a valid range
-                activeAudio = audioList?.get(audioIndex) ?: MusicItem()
+                activeAudio = audioList?.get(audioIndex)
             } else {
                 stopSelf()
             }
@@ -502,19 +508,20 @@ class MediaPlayerService : Service(),MediaPlayerContract.View, OnCompletionListe
     }
 
     override fun skipToNext() {
-        when {
-            styleMusic == StyleMusic.RANDOM -> {
-                audioIndex  = Util.randomNumber(0,audioList?.size?.minus(1) ?: 0)
-                activeAudio = audioList?.get(audioIndex)
-            }
-            audioIndex == audioList?.size?.minus(1) ?: 0 -> {
-                //if last in playlist
-                audioIndex  = 0
-                activeAudio = audioList?.get(audioIndex)
-            }
-            else -> {
-                //get next in playlist
-                activeAudio = audioList?.get(++audioIndex)
+        if (styleMusic == StyleMusic.RANDOM && audioList?.size ?: 0 > 2){
+            audioIndex  = Util.randomNumber(0,audioList?.size?.minus(1) ?: 0)
+            activeAudio = audioList?.get(audioIndex)
+        }else {
+            when (audioIndex) {
+                audioList?.size?.minus(1) ?: 0 -> {
+                    //if last in playlist
+                    audioIndex  = 0
+                    activeAudio = audioList?.get(audioIndex)
+                }
+                else -> {
+                    //get next in playlist
+                    activeAudio = audioList?.get(++audioIndex)
+                }
             }
         }
 
@@ -528,20 +535,21 @@ class MediaPlayerService : Service(),MediaPlayerContract.View, OnCompletionListe
     }
 
     override fun skipToPrevious() {
-        when {
-            styleMusic == StyleMusic.RANDOM -> {
-                audioIndex  = Util.randomNumber(0,audioList?.size?.minus(1) ?: 0)
-                activeAudio = audioList?.get(audioIndex)
-            }
-            audioIndex == 0 -> {
-                //if first in playlist
-                //set index to the last of audioList
-                audioIndex  = audioList?.size?.minus(1) ?: 0
-                activeAudio = audioList?.get(audioIndex)
-            }
-            else -> {
-                //get previous in playlist
-                activeAudio = audioList?.get(--audioIndex)
+        if (styleMusic == StyleMusic.RANDOM && audioList?.size ?: 0 > 2){
+            audioIndex  = Util.randomNumber(0,audioList?.size?.minus(1) ?: 0)
+            activeAudio = audioList?.get(audioIndex)
+        }else {
+            when (audioIndex) {
+                0 -> {
+                    //if first in playlist
+                    //set index to the last of audioList
+                    audioIndex = audioList?.size?.minus(1) ?: 0
+                    activeAudio = audioList?.get(audioIndex)
+                }
+                else -> {
+                    //get previous in playlist
+                    activeAudio = audioList?.get(--audioIndex)
+                }
             }
         }
 
@@ -569,7 +577,9 @@ class MediaPlayerService : Service(),MediaPlayerContract.View, OnCompletionListe
             playPauseAction = playbackAction(0)
         }
 
-        val likeAction = if (playbackStatus == PlaybackStatus.LIKE){
+        //// Notification favorite music
+        val checkData = activeAudio?.id?.let { realmHelper?.checkData(it) }
+        val likeAction = if ( checkData != false){
             playbackAction(7)
         }else{
             playbackAction(6)
@@ -595,7 +605,7 @@ class MediaPlayerService : Service(),MediaPlayerContract.View, OnCompletionListe
                 "next",
                 playbackAction(2)
             )
-            .addAction(setIconLike(playbackStatus),"like",likeAction)
+            .addAction(setIconLike(),"like",likeAction)
             .setContentIntent(pendingIntent)
             .setStyle(androidx.media.app.NotificationCompat.MediaStyle()
                 .setShowActionsInCompactView(1,2,3)
@@ -652,14 +662,6 @@ class MediaPlayerService : Service(),MediaPlayerContract.View, OnCompletionListe
             else -> {
                 R.drawable.ic_looping_grey
             }
-        }
-    }
-
-    override fun setIconLike(playbackStatus: PlaybackStatus): Int {
-        return if (playbackStatus == PlaybackStatus.LIKE){
-            R.drawable.ic_like_grey
-        }else{
-            R.drawable.ic_unlike_grey
         }
     }
 
@@ -736,7 +738,7 @@ class MediaPlayerService : Service(),MediaPlayerContract.View, OnCompletionListe
                 return PendingIntent.getService(this, actionNumber, playbackAction, 0)
             }
             7 -> {
-                // Like
+                // UnLike
                 playbackAction.action = Constant.ACTION_UNLIKE
                 return PendingIntent.getService(this, actionNumber, playbackAction, 0)
             }
@@ -777,10 +779,23 @@ class MediaPlayerService : Service(),MediaPlayerContract.View, OnCompletionListe
         }
     }
 
+    override fun setIconLike(): Int {
+        val checkData = activeAudio?.id?.let { realmHelper?.checkData(it) }
+        return if (checkData != false){
+            R.drawable.ic_like_grey
+        }else{
+            R.drawable.ic_unlike_grey
+        }
+    }
+
     override fun setLikeAction(playbackStatus: PlaybackStatus) {
-        if (playbackStatus == PlaybackStatus.LIKE){
+        val idMusic = activeAudio?.id ?: 0
+        val checkData = activeAudio?.id?.let { realmHelper?.checkData(it) }
+        if (checkData != true){
+            activeAudio?.let { realmHelper?.save(it) }
             buildNotification(PlaybackStatus.LIKE)
         }else{
+            realmHelper?.deleteMusic(idMusic)
             buildNotification(PlaybackStatus.UNLIKE)
         }
         callback?.onAction(playbackStatus)

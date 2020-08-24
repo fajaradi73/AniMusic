@@ -8,6 +8,8 @@ import id.fajarproject.animusic.di.component.ApplicationComponent
 import id.fajarproject.animusic.di.component.DaggerApplicationComponent
 import id.fajarproject.animusic.di.module.ApplicationModule
 import id.fajarproject.animusic.utils.Constant
+import io.realm.Realm
+import io.realm.RealmConfiguration
 
 
 /**
@@ -20,6 +22,11 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         setup()
+        Realm.init(this)
+        val realmConfig = RealmConfiguration.Builder()
+            .deleteRealmIfMigrationNeeded()
+            .build()
+        Realm.setDefaultConfiguration(realmConfig)
         createNotificationChannel()
     }
 

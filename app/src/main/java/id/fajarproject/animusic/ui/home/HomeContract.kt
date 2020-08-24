@@ -19,7 +19,7 @@ class HomeContract {
         fun setViewMinimize()
         fun setMusicPlayer(item: MusicItem)
         fun setVolume()
-        fun setAction()
+        fun setAction(item: MusicItem)
         fun previousMusic()
         fun nextMusic()
         fun runPlayer(view: android.view.View)
@@ -30,6 +30,7 @@ class HomeContract {
         fun setCallBackMusic()
         fun setImageRotate()
         fun setIconLike(likeType : String)
+        fun setLikeUpdate()
     }
 
     interface Presenter<V> : BaseContract.Presenter<V>{

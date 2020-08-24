@@ -43,7 +43,7 @@ class MediaPlayerContract {
         fun setIconStyle(id : Int) : Int
         fun styleMusic()
         fun saveStyle(style: Int)
-        fun setIconLike(playbackStatus: PlaybackStatus) : Int
+        fun setIconLike() : Int
         fun setLikeAction(playbackStatus: PlaybackStatus)
     }
 
