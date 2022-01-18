@@ -6,7 +6,7 @@ package id.fajarproject.animusic.utils
  */
 
 object StyleMusic {
-    const val LOOPING   = 0
-    const val RANDOM    = 1
-    const val REPEAT    = 2
+    const val LOOPING = 0
+    const val RANDOM = 1
+    const val REPEAT = 2
 }

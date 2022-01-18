@@ -10,9 +10,9 @@ import io.reactivex.disposables.CompositeDisposable
 
 open class BasePresenter<V> : BaseContract.Presenter<V> {
     val subscriptions = CompositeDisposable()
-    val api : ApiServiceInterface = ApiServiceInterface.create()
+    val api: ApiServiceInterface = ApiServiceInterface.create()
 
-    var view : V? = null
+    var view: V? = null
 
     override fun attach(view: V) {
         this.view = view

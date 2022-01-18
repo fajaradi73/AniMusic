@@ -50,11 +50,13 @@ import javax.inject.Inject
  * Created by Fajar Adi Prasetyo on 11/08/2020.
  */
 
-class MediaPlayerService : Service(),MediaPlayerContract.View, OnCompletionListener, OnPreparedListener,
+class MediaPlayerService : Service(), MediaPlayerContract.View, OnCompletionListener,
+    OnPreparedListener,
     OnErrorListener, OnSeekCompleteListener, OnInfoListener,
     OnBufferingUpdateListener, OnAudioFocusChangeListener {
 
-    @Inject lateinit var presenter: MediaPlayerContract.Presenter
+    @Inject
+    lateinit var presenter: MediaPlayerContract.Presenter
 
     private var mediaPlayer: MediaPlayer? = null
 
@@ -82,13 +84,13 @@ class MediaPlayerService : Service(),MediaPlayerContract.View, OnCompletionListe
     private val notificationID = 101
 
     //// Callback activity
-    private var callback : MediaPlayerContract.Callback? = null
+    private var callback: MediaPlayerContract.Callback? = null
     private var becomingNoisyReceiver: BroadcastReceiver? = null
 
     override var styleMusic = StyleMusic.LOOPING
 
     private var realm = Realm.getDefaultInstance()
-    private var realmHelper : RealmHelper? = null
+    private var realmHelper: RealmHelper? = null
 
     // Binder given to clients
     private val iBinder: IBinder = LocalBinder()
@@ -101,11 +103,13 @@ class MediaPlayerService : Service(),MediaPlayerContract.View, OnCompletionListe
         // Perform one-time setup procedures
         injectDependency()
         presenter.attach(this)
-        styleMusic  = AppPreference.getIntPreferenceByName(this,Constant.styleMusic)
+        styleMusic = AppPreference.getIntPreferenceByName(this, Constant.styleMusic)
         // Manage incoming phone calls during playback.
         // Pause MediaPlayer on incoming call,
         // Resume on hangup.
-        callStateListener()
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q){
+            callStateListener()
+        }
         // Setup Realm
         realmHelper = RealmHelper(realm)
 
@@ -134,7 +138,9 @@ class MediaPlayerService : Service(),MediaPlayerContract.View, OnCompletionListe
         mediaPlayer?.setOnInfoListener(this)
         //Reset so that the MediaPlayer is not pointing to another data source
         mediaPlayer?.reset()
-        mediaPlayer?.setAudioAttributes(AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build())
+        mediaPlayer?.setAudioAttributes(
+            AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build()
+        )
         try {
             // Set the data source to the mediaFile location
             mediaPlayer?.setDataSource(activeAudio?.linkMp3)
@@ -168,9 +174,9 @@ class MediaPlayerService : Service(),MediaPlayerContract.View, OnCompletionListe
     }
 
     override fun resumeMedia() {
-        if (mediaPlayer == null){
+        if (mediaPlayer == null) {
             initMediaPlayer()
-        }else if (mediaPlayer?.isPlaying != true) {
+        } else if (mediaPlayer?.isPlaying != true) {
             mediaPlayer?.seekTo(resumePosition)
             mediaPlayer?.start()
         }
@@ -199,7 +205,7 @@ class MediaPlayerService : Service(),MediaPlayerContract.View, OnCompletionListe
 
     override fun onCompletion(mp: MediaPlayer?) {
         //Invoked when playback of a media source has completed.
-        if (styleMusic != StyleMusic.REPEAT){
+        if (styleMusic != StyleMusic.REPEAT) {
             callback?.onComplete()
             transportControls?.skipToNext()
         }
@@ -470,7 +476,7 @@ class MediaPlayerService : Service(),MediaPlayerContract.View, OnCompletionListe
 
             override fun onMediaButtonEvent(mediaButtonEvent: Intent?): Boolean {
                 val ke: KeyEvent? = mediaButtonEvent?.getParcelableExtra(Intent.EXTRA_KEY_EVENT)
-                if (ke?.action == KeyEvent.ACTION_DOWN){
+                if (ke?.action == KeyEvent.ACTION_DOWN) {
                     when (ke.keyCode) {
                         KeyEvent.KEYCODE_MEDIA_PLAY -> {
                             transportControls?.pause()
@@ -508,14 +514,14 @@ class MediaPlayerService : Service(),MediaPlayerContract.View, OnCompletionListe
     }
 
     override fun skipToNext() {
-        if (styleMusic == StyleMusic.RANDOM && audioList?.size ?: 0 > 2){
-            audioIndex  = Util.randomNumber(0,audioList?.size?.minus(1) ?: 0)
+        if (styleMusic == StyleMusic.RANDOM && audioList?.size ?: 0 > 2) {
+            audioIndex = Util.randomNumber(0, audioList?.size?.minus(1) ?: 0)
             activeAudio = audioList?.get(audioIndex)
-        }else {
+        } else {
             when (audioIndex) {
                 audioList?.size?.minus(1) ?: 0 -> {
                     //if last in playlist
-                    audioIndex  = 0
+                    audioIndex = 0
                     activeAudio = audioList?.get(audioIndex)
                 }
                 else -> {
@@ -535,10 +541,10 @@ class MediaPlayerService : Service(),MediaPlayerContract.View, OnCompletionListe
     }
 
     override fun skipToPrevious() {
-        if (styleMusic == StyleMusic.RANDOM && audioList?.size ?: 0 > 2){
-            audioIndex  = Util.randomNumber(0,audioList?.size?.minus(1) ?: 0)
+        if (styleMusic == StyleMusic.RANDOM && audioList?.size ?: 0 > 2) {
+            audioIndex = Util.randomNumber(0, audioList?.size?.minus(1) ?: 0)
             activeAudio = audioList?.get(audioIndex)
-        }else {
+        } else {
             when (audioIndex) {
                 0 -> {
                     //if first in playlist
@@ -579,80 +585,86 @@ class MediaPlayerService : Service(),MediaPlayerContract.View, OnCompletionListe
 
         //// Notification favorite music
         val checkData = activeAudio?.id?.let { realmHelper?.checkData(it) }
-        val likeAction = if ( checkData != false){
+        val likeAction = if (checkData != false) {
             playbackAction(7)
-        }else{
+        } else {
             playbackAction(6)
         }
 
-        val intent = Intent(this,HomeActivity::class.java)
+        val intent = Intent(this, HomeActivity::class.java)
         intent.flags = (Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-        val pendingIntent = PendingIntent.getActivity(this,0,intent,PendingIntent.FLAG_UPDATE_CURRENT)
+        val pendingIntent =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_MUTABLE)
+            } else {
+                PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+            }
 
         // Create a new Notification
-        val notificationBuilder: NotificationCompat.Builder = NotificationCompat.Builder(this,Constant.ChannelPlay)
-            .setShowWhen(false)
-            .setAutoCancel(false)
-            .setSmallIcon(R.drawable.ic_headphone) // Set Notification content information
-            .setContentText(activeAudio?.namaBand)
-            .setContentTitle(activeAudio?.judulMusic?.replace(".mp3",""))
-            .setContentInfo(activeAudio?.musicCover) // Add playback actions
-            .addAction(setIconStyle(styleMusic),"style",playbackAction(5))
-            .addAction(R.drawable.ic_previous_grey, "previous", playbackAction(3))
-            .addAction(notificationAction, "pause", playPauseAction)
-            .addAction(
-                R.drawable.ic_next_grey,
-                "next",
-                playbackAction(2)
-            )
-            .addAction(setIconLike(),"like",likeAction)
-            .setContentIntent(pendingIntent)
-            .setStyle(androidx.media.app.NotificationCompat.MediaStyle()
-                .setShowActionsInCompactView(1,2,3)
-                .setShowCancelButton(true)
-                .setCancelButtonIntent(playbackAction(4))
-                .setMediaSession(mediaSession?.sessionToken))
-        var mChannel: NotificationChannel? = null
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
-            mChannel = NotificationChannel(Constant.ChannelPlay, Constant.ChannelPlay, importance)
-            mChannel.setShowBadge(true)
-            mChannel.setSound(null,null)
-            notificationBuilder.setChannelId(Constant.ChannelPlay)
-        }
+        val notificationBuilder: NotificationCompat.Builder =
+            NotificationCompat.Builder(this, Constant.ChannelPlay)
+                .setShowWhen(false)
+                .setAutoCancel(false)
+                .setSmallIcon(R.drawable.ic_headphone) // Set Notification content information
+                .setContentText(activeAudio?.namaBand)
+                .setContentTitle(activeAudio?.judulMusic?.replace(".mp3", ""))
+                .setContentInfo(activeAudio?.musicCover) // Add playback actions
+                .addAction(setIconStyle(styleMusic), "style", playbackAction(5))
+                .addAction(R.drawable.ic_previous_grey, "previous", playbackAction(3))
+                .addAction(notificationAction, "pause", playPauseAction)
+                .addAction(
+                    R.drawable.ic_next_grey,
+                    "next",
+                    playbackAction(2)
+                )
+                .addAction(setIconLike(), "like", likeAction)
+                .setContentIntent(pendingIntent)
+                .setStyle(
+                    androidx.media.app.NotificationCompat.MediaStyle()
+                        .setShowActionsInCompactView(1, 2, 3)
+                        .setShowCancelButton(true)
+                        .setCancelButtonIntent(playbackAction(4))
+                        .setMediaSession(mediaSession?.sessionToken)
+                )
 
         val mNotifyMgr =
             getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            mChannel?.let { mNotifyMgr.createNotificationChannel(it) }
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val mChannel =
+                NotificationChannel(Constant.ChannelPlay, Constant.ChannelPlay, importance)
+            mChannel.setShowBadge(true)
+            mChannel.setSound(null, null)
+            notificationBuilder.setChannelId(Constant.ChannelPlay)
+            mChannel.let { mNotifyMgr.createNotificationChannel(it) }
+
         }
 
         Glide.with(applicationContext)
             .asBitmap()
             .load(Constant.BaseUrlImage + activeAudio?.cover)
             .error(R.drawable.ic_placeholder)
-            .into(object : CustomTarget<Bitmap>(){
+            .into(object : CustomTarget<Bitmap>() {
                 override fun onLoadCleared(placeholder: Drawable?) {
                 }
 
                 override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
                     notificationBuilder.setLargeIcon(resource)
-                    startForeground(2,notificationBuilder.build())
-                    if (playbackStatus == PlaybackStatus.PAUSED){
+                    startForeground(2, notificationBuilder.build())
+                    if (playbackStatus == PlaybackStatus.PAUSED) {
                         Handler().postDelayed({
                             if (mediaPlayer?.isPlaying != true) {
                                 stopForeground(false)
                             }
-                        },5000)
+                        }, 5000)
                     }
                 }
             })
     }
 
     override fun setIconStyle(id: Int): Int {
-        return when(id) {
+        return when (id) {
             StyleMusic.REPEAT -> {
                 R.drawable.ic_repeat_grey
             }
@@ -666,7 +678,7 @@ class MediaPlayerService : Service(),MediaPlayerContract.View, OnCompletionListe
     }
 
     override fun styleMusic() {
-        when(styleMusic) {
+        when (styleMusic) {
             StyleMusic.LOOPING -> {
                 saveStyle(StyleMusic.RANDOM)
                 buildNotification(PlaybackStatus.STYLE)
@@ -690,7 +702,7 @@ class MediaPlayerService : Service(),MediaPlayerContract.View, OnCompletionListe
 
     override fun saveStyle(style: Int) {
         styleMusic = style
-        AppPreference.writePreference(this,Constant.styleMusic,style)
+        AppPreference.writePreference(this, Constant.styleMusic, style)
     }
 
     override fun removeNotification() {
@@ -705,43 +717,68 @@ class MediaPlayerService : Service(),MediaPlayerContract.View, OnCompletionListe
             0 -> {
                 // Play
                 playbackAction.action = Constant.ACTION_PLAY
-                return PendingIntent.getService(this, actionNumber, playbackAction, 0)
-            }
+                return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    PendingIntent.getService(this, actionNumber, playbackAction, PendingIntent.FLAG_MUTABLE)
+                } else {
+                    PendingIntent.getService(this, actionNumber, playbackAction, 0)
+                }            }
             1 -> {
                 // Pause
                 playbackAction.action = Constant.ACTION_PAUSE
-                return PendingIntent.getService(this, actionNumber, playbackAction, 0)
+                return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    PendingIntent.getService(this, actionNumber, playbackAction, PendingIntent.FLAG_MUTABLE)
+                } else {
+                    PendingIntent.getService(this, actionNumber, playbackAction, 0)
+                }
             }
             2 -> {
                 // Next track
                 playbackAction.action = Constant.ACTION_NEXT
-                return PendingIntent.getService(this, actionNumber, playbackAction, 0)
-            }
+                return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    PendingIntent.getService(this, actionNumber, playbackAction, PendingIntent.FLAG_MUTABLE)
+                } else {
+                    PendingIntent.getService(this, actionNumber, playbackAction, 0)
+                }            }
             3 -> {
                 // Previous track
                 playbackAction.action = Constant.ACTION_PREVIOUS
-                return PendingIntent.getService(this, actionNumber, playbackAction, 0)
-            }
+                return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    PendingIntent.getService(this, actionNumber, playbackAction, PendingIntent.FLAG_MUTABLE)
+                } else {
+                    PendingIntent.getService(this, actionNumber, playbackAction, 0)
+                }            }
             4 -> {
                 // Stop
                 playbackAction.action = Constant.ACTION_STOP
-                return PendingIntent.getService(this, actionNumber, playbackAction, 0)
-            }
+                return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    PendingIntent.getService(this, actionNumber, playbackAction, PendingIntent.FLAG_MUTABLE)
+                } else {
+                    PendingIntent.getService(this, actionNumber, playbackAction, 0)
+                }            }
             5 -> {
                 // Style Music
                 playbackAction.action = Constant.ACTION_STYLE
-                return PendingIntent.getService(this, actionNumber, playbackAction, 0)
-            }
+                return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    PendingIntent.getService(this, actionNumber, playbackAction, PendingIntent.FLAG_MUTABLE)
+                } else {
+                    PendingIntent.getService(this, actionNumber, playbackAction, 0)
+                }            }
             6 -> {
                 // Like
                 playbackAction.action = Constant.ACTION_LIKE
-                return PendingIntent.getService(this, actionNumber, playbackAction, 0)
-            }
+                return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    PendingIntent.getService(this, actionNumber, playbackAction, PendingIntent.FLAG_MUTABLE)
+                } else {
+                    PendingIntent.getService(this, actionNumber, playbackAction, 0)
+                }            }
             7 -> {
                 // UnLike
                 playbackAction.action = Constant.ACTION_UNLIKE
-                return PendingIntent.getService(this, actionNumber, playbackAction, 0)
-            }
+                return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    PendingIntent.getService(this, actionNumber, playbackAction, PendingIntent.FLAG_MUTABLE)
+                } else {
+                    PendingIntent.getService(this, actionNumber, playbackAction, 0)
+                }            }
             else -> {
             }
         }
@@ -767,13 +804,13 @@ class MediaPlayerService : Service(),MediaPlayerContract.View, OnCompletionListe
             actionString.equals(Constant.ACTION_STOP, ignoreCase = true) -> {
                 transportControls?.stop()
             }
-            actionString.equals(Constant.ACTION_STYLE,ignoreCase = true) -> {
+            actionString.equals(Constant.ACTION_STYLE, ignoreCase = true) -> {
                 styleMusic()
             }
-            actionString.equals(Constant.ACTION_LIKE,ignoreCase = true) -> {
+            actionString.equals(Constant.ACTION_LIKE, ignoreCase = true) -> {
                 setLikeAction(PlaybackStatus.LIKE)
             }
-            actionString.equals(Constant.ACTION_UNLIKE,ignoreCase = true) -> {
+            actionString.equals(Constant.ACTION_UNLIKE, ignoreCase = true) -> {
                 setLikeAction(PlaybackStatus.UNLIKE)
             }
         }
@@ -781,9 +818,9 @@ class MediaPlayerService : Service(),MediaPlayerContract.View, OnCompletionListe
 
     override fun setIconLike(): Int {
         val checkData = activeAudio?.id?.let { realmHelper?.checkData(it) }
-        return if (checkData != false){
+        return if (checkData != false) {
             R.drawable.ic_like_grey
-        }else{
+        } else {
             R.drawable.ic_unlike_grey
         }
     }
@@ -791,10 +828,10 @@ class MediaPlayerService : Service(),MediaPlayerContract.View, OnCompletionListe
     override fun setLikeAction(playbackStatus: PlaybackStatus) {
         val idMusic = activeAudio?.id ?: 0
         val checkData = activeAudio?.id?.let { realmHelper?.checkData(it) }
-        if (checkData != true){
+        if (checkData != true) {
             activeAudio?.let { realmHelper?.save(it) }
             buildNotification(PlaybackStatus.LIKE)
-        }else{
+        } else {
             realmHelper?.deleteMusic(idMusic)
             buildNotification(PlaybackStatus.UNLIKE)
         }
@@ -822,13 +859,13 @@ class MediaPlayerService : Service(),MediaPlayerContract.View, OnCompletionListe
             actionString.equals(Constant.ACTION_STOP, ignoreCase = true) -> {
                 transportControls?.stop()
             }
-            actionString.equals(Constant.ACTION_STYLE,ignoreCase = true) -> {
+            actionString.equals(Constant.ACTION_STYLE, ignoreCase = true) -> {
                 styleMusic()
             }
-            actionString.equals(Constant.ACTION_LIKE,ignoreCase = true) -> {
+            actionString.equals(Constant.ACTION_LIKE, ignoreCase = true) -> {
                 setLikeAction(PlaybackStatus.LIKE)
             }
-            actionString.equals(Constant.ACTION_UNLIKE,ignoreCase = true) -> {
+            actionString.equals(Constant.ACTION_UNLIKE, ignoreCase = true) -> {
                 setLikeAction(PlaybackStatus.UNLIKE)
             }
         }

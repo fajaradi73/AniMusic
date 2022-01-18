@@ -24,16 +24,16 @@ class HomeContract {
         fun nextMusic()
         fun runPlayer(view: android.view.View)
         fun updateProgress()
-        fun styleIcon(styleMusic : Int)
+        fun styleIcon(styleMusic: Int)
         val serviceConnection: ServiceConnection
-        fun playAudio(list: MutableList<MusicItem?>,audioIndex: Int)
+        fun playAudio(list: MutableList<MusicItem?>, audioIndex: Int)
         fun setCallBackMusic()
         fun setImageRotate()
-        fun setIconLike(likeType : String)
+        fun setIconLike(likeType: String)
         fun setLikeUpdate()
     }
 
-    interface Presenter<V> : BaseContract.Presenter<V>{
+    interface Presenter<V> : BaseContract.Presenter<V> {
         fun loadData()
     }
 }

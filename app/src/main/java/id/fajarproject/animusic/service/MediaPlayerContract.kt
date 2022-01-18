@@ -3,7 +3,6 @@ package id.fajarproject.animusic.service
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Intent
-import android.graphics.drawable.Drawable
 import id.fajarproject.animusic.utils.PlaybackStatus
 
 
@@ -34,16 +33,16 @@ class MediaPlayerContract {
         fun handleIncomingActions(playbackAction: Intent?)
         fun playbackAction(actionNumber: Int): PendingIntent?
         fun setOnCallbackMedia(callback: Callback)
-        val duration : Int
-        val currentPosition : Int
-        val isPlaying : Boolean
-        val styleMusic : Int
+        val duration: Int
+        val currentPosition: Int
+        val isPlaying: Boolean
+        val styleMusic: Int
         fun seekTo(position: Int)
         fun setOnAction(actionString: String)
-        fun setIconStyle(id : Int) : Int
+        fun setIconStyle(id: Int): Int
         fun styleMusic()
         fun saveStyle(style: Int)
-        fun setIconLike() : Int
+        fun setIconLike(): Int
         fun setLikeAction(playbackStatus: PlaybackStatus)
     }
 
@@ -51,10 +50,10 @@ class MediaPlayerContract {
         fun attach(view: View)
     }
 
-    interface Callback{
+    interface Callback {
         fun onPrepared()
         fun onComplete()
-        fun changeMusic(position : Int)
+        fun changeMusic(position: Int)
         fun onAction(playbackStatus: PlaybackStatus)
     }
 }

@@ -12,14 +12,15 @@ import id.fajarproject.animusic.service.MediaPlayerPresenter
  */
 
 @Module
-class ServiceModule(val service: Service){
+class ServiceModule(val service: Service) {
 
     @Provides
-    fun provideService() : Service{
+    fun provideService(): Service {
         return service
     }
+
     @Provides
-    fun providePresenterService() : MediaPlayerContract.Presenter{
+    fun providePresenterService(): MediaPlayerContract.Presenter {
         return MediaPlayerPresenter(service)
     }
 }

@@ -25,16 +25,16 @@ import javax.inject.Inject
  * Created by Fajar Adi Prasetyo on 14/08/2020.
  */
 
-class FavoriteFragment : BaseFragment(),FavoriteContract.View {
+class FavoriteFragment : BaseFragment(), FavoriteContract.View {
 
     @Inject
     lateinit var presenter: FavoriteContract.Presenter<FavoriteContract.View>
 
-    private var viewHome : HomeContract.View? = null
-    private var adapter : FavoriteAdapter? = null
+    private var viewHome: HomeContract.View? = null
+    private var adapter: FavoriteAdapter? = null
     private var realm = Realm.getDefaultInstance()
-    private var realmHelper : RealmHelper? = null
-    lateinit var storage : StoragePreference
+    private var realmHelper: RealmHelper? = null
+    lateinit var storage: StoragePreference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,19 +60,19 @@ class FavoriteFragment : BaseFragment(),FavoriteContract.View {
 
     override fun onHiddenChanged(hidden: Boolean) {
         super.onHiddenChanged(hidden)
-        if (!hidden){
+        if (!hidden) {
             updateFavorite()
         }
     }
 
     override fun checkData() {
         val count = adapter?.itemCount ?: 0
-        if (count > 0){
-            noData.visibility       = View.GONE
-            clFavorite.visibility   = View.VISIBLE
-        }else{
-            noData.visibility       = View.VISIBLE
-            clFavorite.visibility   = View.GONE
+        if (count > 0) {
+            noData.visibility = View.GONE
+            clFavorite.visibility = View.VISIBLE
+        } else {
+            noData.visibility = View.VISIBLE
+            clFavorite.visibility = View.GONE
         }
     }
 
@@ -83,15 +83,15 @@ class FavoriteFragment : BaseFragment(),FavoriteContract.View {
 
 
     override fun showDataSuccess(list: MutableList<MusicItem?>) {
-        Collections.sort(list,presenter.sortDate())
-        val layoutManager           = LinearLayoutManager(activity)
-        rvFavorite.layoutManager    = layoutManager
-        adapter                     = FavoriteAdapter(activity, list)
-        rvFavorite.adapter          = adapter
-        adapter?.setOnItemClickListener(object : OnItemClickListener{
+        Collections.sort(list, presenter.sortDate())
+        val layoutManager = LinearLayoutManager(activity)
+        rvFavorite.layoutManager = layoutManager
+        adapter = FavoriteAdapter(activity, list)
+        rvFavorite.adapter = adapter
+        adapter?.setOnItemClickListener(object : OnItemClickListener {
             override fun onItemClick(view: View?, position: Int) {
                 storage.storeAudio(list)
-                viewHome?.playAudio(list,position)
+                viewHome?.playAudio(list, position)
             }
         })
         adapter?.notifyDataSetChanged()
@@ -99,12 +99,12 @@ class FavoriteFragment : BaseFragment(),FavoriteContract.View {
         checkData()
         btnPlay.setOnClickListener {
             storage.storeAudio(list)
-            viewHome?.playAudio(list,0)
+            viewHome?.playAudio(list, 0)
         }
     }
 
     override fun showDataFailed(message: String) {
-        Log.e(Constant.tag,message)
+        Log.e(Constant.tag, message)
         checkData()
     }
 

@@ -21,13 +21,13 @@ import java.util.*
 class FavoriteAdapter(private var activity: Activity, private var list: MutableList<MusicItem?>) :
     RecyclerView.Adapter<BaseHolder>(), BaseContract.Holder<MusicItem?> {
 
-    private var onItemClickListener : OnItemClickListener? = null
+    private var onItemClickListener: OnItemClickListener? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = BaseHolder(
         LayoutInflater.from(
             parent.context
-        ).inflate(R.layout.item_favorite, parent, false)
-        , this.onItemClickListener)
+        ).inflate(R.layout.item_favorite, parent, false), this.onItemClickListener
+    )
 
     override fun getItemCount() = list.size
 
@@ -37,12 +37,12 @@ class FavoriteAdapter(private var activity: Activity, private var list: MutableL
         val number = position + 1
         holder.itemView.tvCounting.text = String.format(Locale.getDefault(), "%02d", number)
 
-        holder.itemView.tvJudul.text = item?.judulMusic?.replace(".mp3","")
+        holder.itemView.tvJudul.text = item?.judulMusic?.replace(".mp3", "")
         var namaBand = ""
         item?.namaBand?.let {
-            namaBand = if (it.isNotEmpty()){
+            namaBand = if (it.isNotEmpty()) {
                 it
-            }else{
+            } else {
                 "Artis tak diketahui"
             }
         }.run {
@@ -50,16 +50,16 @@ class FavoriteAdapter(private var activity: Activity, private var list: MutableL
         }
         var namaAlbum = ""
         item?.musicCover?.let {
-            namaAlbum = if (it.isNotEmpty()){
+            namaAlbum = if (it.isNotEmpty()) {
                 it
-            }else{
+            } else {
                 "Album tak diketahui"
             }
         }.run {
             "Album tak diketahui"
         }
 
-        holder.itemView.tvName.text     = "$namaBand | $namaAlbum"
+        holder.itemView.tvName.text = "$namaBand | $namaAlbum"
     }
 
     override fun setOnItemClickListener(onItemClickListener: OnItemClickListener?) {

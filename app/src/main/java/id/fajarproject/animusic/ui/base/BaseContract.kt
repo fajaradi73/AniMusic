@@ -20,8 +20,8 @@ class BaseContract {
     }
 
 
-    interface Holder<M>{
+    interface Holder<M> {
         fun setOnItemClickListener(onItemClickListener: OnItemClickListener?)
-        fun getItem(position : Int) : M
+        fun getItem(position: Int): M
     }
 }

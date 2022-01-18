@@ -17,16 +17,17 @@ import id.fajarproject.animusic.ui.online.OnlinePresenter
 class FragmentModule(var context: Context) {
 
     @Provides
-    fun provideContext() : Context {
+    fun provideContext(): Context {
         return context
     }
 
     @Provides
-    fun provideOnlinePresenter() : OnlineContract.Presenter<OnlineContract.View>{
+    fun provideOnlinePresenter(): OnlineContract.Presenter<OnlineContract.View> {
         return OnlinePresenter()
     }
+
     @Provides
-    fun provideFavoritePresenter() : FavoriteContract.Presenter<FavoriteContract.View>{
+    fun provideFavoritePresenter(): FavoriteContract.Presenter<FavoriteContract.View> {
         return FavoritePresenter()
     }
 }

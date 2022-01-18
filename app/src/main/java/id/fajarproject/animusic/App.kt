@@ -17,7 +17,7 @@ import io.realm.RealmConfiguration
  */
 class App : Application() {
 
-    lateinit var component : ApplicationComponent
+    lateinit var component: ApplicationComponent
 
     override fun onCreate() {
         super.onCreate()
@@ -30,11 +30,13 @@ class App : Application() {
         createNotificationChannel()
     }
 
-    private fun createNotificationChannel(){
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)  {
-            val channel = NotificationChannel(Constant.ChannelID,
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                Constant.ChannelID,
                 Constant.ChannelName,
-                NotificationManager.IMPORTANCE_DEFAULT)
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
             val manager = getSystemService(NotificationManager::class.java)
             manager?.createNotificationChannel(channel)
         }

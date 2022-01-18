@@ -10,16 +10,16 @@ import io.reactivex.schedulers.Schedulers
  * Created by Fajar Adi Prasetyo on 14/08/2020.
  */
 
-class OnlinePresenter<V : OnlineContract.View> : BasePresenter<V>(),OnlineContract.Presenter<V>{
+class OnlinePresenter<V : OnlineContract.View> : BasePresenter<V>(), OnlineContract.Presenter<V> {
 
     override fun loadData() {
         view?.showLoading()
         val subscribe = api.getMusic().subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({data : MusicModel ->
+            .subscribe({ data: MusicModel ->
                 view?.hideLoading()
                 view?.showDataSuccess(data.music ?: arrayListOf())
-            },{error ->
+            }, { error ->
                 view?.hideLoading()
                 view?.showDataFailed(error.message ?: "")
             })

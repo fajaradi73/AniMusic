@@ -4,6 +4,6 @@ import com.google.gson.annotations.SerializedName
 
 data class MusicModel(
 
-	@field:SerializedName("post")
-	val music: MutableList<MusicItem?>? = null
+    @field:SerializedName("post")
+    val music: MutableList<MusicItem?>? = null
 )

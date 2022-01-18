@@ -11,7 +11,7 @@ import id.fajarproject.animusic.ui.home.HomeActivity
  */
 
 @PerActivity
-@Component(dependencies = [ApplicationComponent::class],modules = [ActivityModule::class])
+@Component(dependencies = [ApplicationComponent::class], modules = [ActivityModule::class])
 interface ActivityComponent {
     fun inject(homeActivity: HomeActivity)
 }

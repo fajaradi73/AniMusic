@@ -18,7 +18,7 @@ class SplashScreen : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         AppPreference.writePreference(this, Constant.tag, Constant.online)
 
-        val intent = Intent(this,HomeActivity::class.java)
+        val intent = Intent(this, HomeActivity::class.java)
         intent.flags = (Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
 
         startActivity(intent)

@@ -16,7 +16,7 @@ import retrofit2.http.GET
 interface ApiServiceInterface {
 
     @GET("listmusic")
-    fun getMusic() : Observable<MusicModel>
+    fun getMusic(): Observable<MusicModel>
 
     companion object Factory {
         fun create(): ApiServiceInterface {

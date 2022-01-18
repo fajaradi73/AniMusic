@@ -10,13 +10,13 @@ import id.fajarproject.animusic.ui.base.BaseContract
 
 class OnlineContract {
 
-    interface View : BaseContract.View{
+    interface View : BaseContract.View {
         fun showDataSuccess(list: MutableList<MusicItem?>)
-        fun showDataFailed(message : String)
+        fun showDataFailed(message: String)
         fun checkData()
     }
 
-    interface Presenter<V> : BaseContract.Presenter<V>{
+    interface Presenter<V> : BaseContract.Presenter<V> {
         fun loadData()
     }
 }

@@ -17,7 +17,7 @@ import id.fajarproject.animusic.ui.home.HomeContract
 class SettingsFragment : BaseFragment() {
 
 
-    var viewHome : HomeContract.View? = null
+    var viewHome: HomeContract.View? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

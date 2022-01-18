@@ -12,7 +12,7 @@ import id.fajarproject.animusic.ui.home.HomePresenter
  */
 
 @Module
-class ActivityModule (private var activity: Activity) {
+class ActivityModule(private var activity: Activity) {
 
     @Provides
     fun provideActivity(): Activity {
@@ -20,7 +20,7 @@ class ActivityModule (private var activity: Activity) {
     }
 
     @Provides
-    fun provideHomePresenter() : HomeContract.Presenter<HomeContract.View>{
+    fun provideHomePresenter(): HomeContract.Presenter<HomeContract.View> {
         return HomePresenter()
     }
 }

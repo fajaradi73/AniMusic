@@ -22,15 +22,15 @@ import kotlinx.android.synthetic.main.item_music.view.*
  */
 
 class HomeAdapter(private var activity: Activity, private var list: MutableList<MusicItem?>) :
-        RecyclerView.Adapter<BaseHolder>(),BaseContract.Holder<MusicItem?> {
+    RecyclerView.Adapter<BaseHolder>(), BaseContract.Holder<MusicItem?> {
 
-    private var onItemClickListener : OnItemClickListener? = null
+    private var onItemClickListener: OnItemClickListener? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = BaseHolder(
         LayoutInflater.from(
-        parent.context
-    ).inflate(R.layout.item_music, parent, false)
-        , this.onItemClickListener)
+            parent.context
+        ).inflate(R.layout.item_music, parent, false), this.onItemClickListener
+    )
 
     override fun getItemCount() = list.size
 
@@ -45,12 +45,12 @@ class HomeAdapter(private var activity: Activity, private var list: MutableList<
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .into(holder.itemView.ivPoster)
 
-        holder.itemView.tvJudul.text = item?.judulMusic?.replace(".mp3","")
+        holder.itemView.tvJudul.text = item?.judulMusic?.replace(".mp3", "")
         var namaBand = ""
         item?.namaBand?.let {
-            namaBand = if (it.isNotEmpty()){
+            namaBand = if (it.isNotEmpty()) {
                 it
-            }else{
+            } else {
                 "Artis tak diketahui"
             }
         }.run {
@@ -58,16 +58,16 @@ class HomeAdapter(private var activity: Activity, private var list: MutableList<
         }
         var namaAlbum = ""
         item?.musicCover?.let {
-            namaAlbum = if (it.isNotEmpty()){
+            namaAlbum = if (it.isNotEmpty()) {
                 it
-            }else{
+            } else {
                 "Album tak diketahui"
             }
         }.run {
             "Album tak diketahui"
         }
 
-        holder.itemView.tvName.text     = "$namaBand | $namaAlbum"
+        holder.itemView.tvName.text = "$namaBand | $namaAlbum"
     }
 
     override fun setOnItemClickListener(onItemClickListener: OnItemClickListener?) {
@@ -76,5 +76,4 @@ class HomeAdapter(private var activity: Activity, private var list: MutableList<
 
     override fun getItem(position: Int) = list[position]
 
-    fun getList() = list
 }

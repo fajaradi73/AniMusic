@@ -11,7 +11,7 @@ import id.fajarproject.animusic.service.MediaPlayerService
  */
 
 @PerService
-@Component(dependencies = [ApplicationComponent::class],modules = [ServiceModule::class])
+@Component(dependencies = [ApplicationComponent::class], modules = [ServiceModule::class])
 interface ServiceComponent {
     fun inject(mediaPlayerService: MediaPlayerService)
 }

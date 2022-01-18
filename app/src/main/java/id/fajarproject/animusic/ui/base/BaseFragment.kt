@@ -14,9 +14,9 @@ import io.reactivex.disposables.CompositeDisposable
  * Created by Fajar Adi Prasetyo on 14/08/2020.
  */
 
-open class BaseFragment  : Fragment(){
+open class BaseFragment : Fragment() {
     lateinit var component: FragmentComponent
-    lateinit var activity : Activity
+    lateinit var activity: Activity
 
     private val subscriptions = CompositeDisposable()
 
