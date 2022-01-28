@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import id.fajarproject.animusic.R
+import id.fajarproject.animusic.databinding.FragmentDownloadBinding
 import id.fajarproject.animusic.ui.base.BaseFragment
 import id.fajarproject.animusic.ui.home.HomeActivity
 import id.fajarproject.animusic.ui.home.HomeContract
@@ -17,6 +18,7 @@ import id.fajarproject.animusic.ui.home.HomeContract
 class DownloadFragment : BaseFragment() {
 
     var viewHome: HomeContract.View? = null
+    private lateinit var downloadBinding: FragmentDownloadBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,9 +29,10 @@ class DownloadFragment : BaseFragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_download, container, false)
+        downloadBinding = FragmentDownloadBinding.inflate(inflater,container,false)
+        return downloadBinding.root
     }
 
 }

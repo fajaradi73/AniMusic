@@ -7,10 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import id.fajarproject.animusic.R
 import id.fajarproject.animusic.data.network.model.MusicItem
 import id.fajarproject.animusic.data.pref.AppPreference
 import id.fajarproject.animusic.data.pref.StoragePreference
+import id.fajarproject.animusic.databinding.FragmentOnlineBinding
 import id.fajarproject.animusic.ui.base.BaseFragment
 import id.fajarproject.animusic.ui.customView.OnItemClickListener
 import id.fajarproject.animusic.ui.home.HomeActivity
@@ -18,7 +18,6 @@ import id.fajarproject.animusic.ui.home.HomeContract
 import id.fajarproject.animusic.utils.Constant
 import id.fajarproject.animusic.utils.StyleMusic
 import id.fajarproject.animusic.utils.Util
-import kotlinx.android.synthetic.main.fragment_online.*
 import javax.inject.Inject
 
 /**
@@ -35,6 +34,7 @@ class OnlineFragment : BaseFragment(), OnlineContract.View {
     lateinit var presenter: OnlineContract.Presenter<OnlineContract.View>
 
     var viewHome: HomeContract.View? = null
+    private lateinit var onlineBinding: FragmentOnlineBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,20 +45,20 @@ class OnlineFragment : BaseFragment(), OnlineContract.View {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_online, container, false)
+        onlineBinding = FragmentOnlineBinding.inflate(inflater, container, false)
+        return onlineBinding.root
     }
 
     lateinit var storage: StoragePreference
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         presenter.attach(this)
         storage = StoragePreference(activity)
 
         presenter.loadData()
-
     }
 
     override fun showDataSuccess(list: MutableList<MusicItem?>) {
@@ -66,9 +66,9 @@ class OnlineFragment : BaseFragment(), OnlineContract.View {
             storage.storeAudio(list)
         }
         this.list = list
-        rvMusic.layoutManager = LinearLayoutManager(activity)
+        onlineBinding.rvMusic.layoutManager = LinearLayoutManager(activity)
         adapter = OnlineAdapter(activity, list)
-        rvMusic.adapter = adapter
+        onlineBinding.rvMusic.adapter = adapter
         adapter?.setOnItemClickListener(object : OnItemClickListener {
             override fun onItemClick(view: View?, position: Int) {
                 storage.storeAudio(list)
@@ -76,7 +76,7 @@ class OnlineFragment : BaseFragment(), OnlineContract.View {
             }
         })
         checkData()
-        btnRandom.setOnClickListener {
+        onlineBinding.btnRandom.setOnClickListener {
             storage.storeAudio(list)
             AppPreference.writePreference(activity, Constant.styleMusic, StyleMusic.RANDOM)
             val randomIndex = Util.randomNumber(0, list.size.minus(1))
@@ -92,11 +92,11 @@ class OnlineFragment : BaseFragment(), OnlineContract.View {
     override fun checkData() {
         val count = adapter?.itemCount ?: 0
         if (count > 0) {
-            noData.visibility = View.GONE
-            clMusic.visibility = View.VISIBLE
+            onlineBinding.noData.visibility = View.GONE
+            onlineBinding.clMusic.visibility = View.VISIBLE
         } else {
-            noData.visibility = View.VISIBLE
-            clMusic.visibility = View.GONE
+            onlineBinding.noData.visibility = View.VISIBLE
+            onlineBinding.clMusic.visibility = View.GONE
         }
     }
 
@@ -107,8 +107,8 @@ class OnlineFragment : BaseFragment(), OnlineContract.View {
     }
 
     override fun showLoading() {
-        progressBar.visibility = View.VISIBLE
-        clMusic.visibility = View.GONE
+        onlineBinding.progressBar.visibility = View.VISIBLE
+        onlineBinding.clMusic.visibility = View.GONE
         activity.window?.setFlags(
             WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
             WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
@@ -116,8 +116,8 @@ class OnlineFragment : BaseFragment(), OnlineContract.View {
     }
 
     override fun hideLoading() {
-        progressBar.visibility = View.GONE
-        clMusic.visibility = View.VISIBLE
+        onlineBinding.progressBar.visibility = View.GONE
+        onlineBinding.clMusic.visibility = View.VISIBLE
         activity.window?.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
     }
 }

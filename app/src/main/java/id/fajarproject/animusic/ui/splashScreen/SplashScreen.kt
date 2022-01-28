@@ -1,5 +1,6 @@
 package id.fajarproject.animusic.ui.splashScreen
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -13,6 +14,7 @@ import id.fajarproject.animusic.utils.Constant
  * Created by Fajar Adi Prasetyo on 05/08/2020.
  */
 
+@SuppressLint("CustomSplashScreen")
 class SplashScreen : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

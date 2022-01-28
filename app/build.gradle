@@ -1,6 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-parcelize'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: 'com.google.firebase.firebase-perf'
@@ -10,6 +10,9 @@ apply plugin: 'realm-android'
 
 android {
     compileSdkVersion 32
+    buildFeatures {
+        viewBinding true
+    }
 
     defaultConfig {
         applicationId "id.fajarproject.animusic"
@@ -48,7 +51,7 @@ static def getDate() {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.4.21"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.4.10"
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.4.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
@@ -98,9 +101,9 @@ dependencies {
     implementation "io.reactivex.rxjava2:rxkotlin:2.4.0"
 
     // dependency injection
-    implementation "com.google.dagger:dagger:2.29.1"
+    implementation "com.google.dagger:dagger:2.35.1"
     //noinspection OutdatedLibrary
-    implementation "com.google.dagger:dagger-android:2.29.1"
+    implementation "com.google.dagger:dagger-android:2.35.1"
     implementation "com.google.dagger:dagger-android-support:2.29.1"
     kapt "com.google.dagger:dagger-compiler:$dagger2_version"
     kapt "com.google.dagger:dagger-android-processor:$dagger2_version"

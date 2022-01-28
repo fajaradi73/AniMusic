@@ -6,17 +6,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
-import id.fajarproject.animusic.R
 import id.fajarproject.animusic.data.network.model.MusicItem
 import id.fajarproject.animusic.data.pref.StoragePreference
 import id.fajarproject.animusic.data.realm.RealmHelper
+import id.fajarproject.animusic.databinding.FragmentFavoriteBinding
 import id.fajarproject.animusic.ui.base.BaseFragment
 import id.fajarproject.animusic.ui.customView.OnItemClickListener
 import id.fajarproject.animusic.ui.home.HomeActivity
 import id.fajarproject.animusic.ui.home.HomeContract
 import id.fajarproject.animusic.utils.Constant
 import io.realm.Realm
-import kotlinx.android.synthetic.main.fragment_favorite.*
 import java.util.*
 import javax.inject.Inject
 
@@ -35,6 +34,7 @@ class FavoriteFragment : BaseFragment(), FavoriteContract.View {
     private var realm = Realm.getDefaultInstance()
     private var realmHelper: RealmHelper? = null
     lateinit var storage: StoragePreference
+    private lateinit var favoriteBinding: FragmentFavoriteBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,9 +45,10 @@ class FavoriteFragment : BaseFragment(), FavoriteContract.View {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_favorite, container, false)
+        favoriteBinding = FragmentFavoriteBinding.inflate(inflater, container, false)
+        return favoriteBinding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -68,11 +69,11 @@ class FavoriteFragment : BaseFragment(), FavoriteContract.View {
     override fun checkData() {
         val count = adapter?.itemCount ?: 0
         if (count > 0) {
-            noData.visibility = View.GONE
-            clFavorite.visibility = View.VISIBLE
+            favoriteBinding.noData.visibility = View.GONE
+            favoriteBinding.clFavorite.visibility = View.VISIBLE
         } else {
-            noData.visibility = View.VISIBLE
-            clFavorite.visibility = View.GONE
+            favoriteBinding.noData.visibility = View.VISIBLE
+            favoriteBinding.clFavorite.visibility = View.GONE
         }
     }
 
@@ -85,9 +86,9 @@ class FavoriteFragment : BaseFragment(), FavoriteContract.View {
     override fun showDataSuccess(list: MutableList<MusicItem?>) {
         Collections.sort(list, presenter.sortDate())
         val layoutManager = LinearLayoutManager(activity)
-        rvFavorite.layoutManager = layoutManager
-        adapter = FavoriteAdapter(activity, list)
-        rvFavorite.adapter = adapter
+        favoriteBinding.rvFavorite.layoutManager = layoutManager
+        adapter = FavoriteAdapter(list)
+        favoriteBinding.rvFavorite.adapter = adapter
         adapter?.setOnItemClickListener(object : OnItemClickListener {
             override fun onItemClick(view: View?, position: Int) {
                 storage.storeAudio(list)
@@ -97,7 +98,7 @@ class FavoriteFragment : BaseFragment(), FavoriteContract.View {
         adapter?.notifyDataSetChanged()
 
         checkData()
-        btnPlay.setOnClickListener {
+        favoriteBinding.btnPlay.setOnClickListener {
             storage.storeAudio(list)
             viewHome?.playAudio(list, 0)
         }

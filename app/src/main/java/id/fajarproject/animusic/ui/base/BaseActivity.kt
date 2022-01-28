@@ -9,6 +9,7 @@ import android.provider.Settings
 import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
+import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
@@ -34,13 +35,13 @@ open class BaseActivity : AppCompatActivity() {
 
     lateinit var component: ActivityComponent
 
-    override fun setContentView(layoutResID: Int) {
+    override fun setContentView(view: View?) {
         if (!Util.isInternetAvailable(this)) {
             showDialogInternet()
             isConnection = false
             return
         }
-        super.setContentView(layoutResID)
+        super.setContentView(view)
         activity = this
         component = DaggerActivityComponent.builder()
             .activityModule(ActivityModule(this))

@@ -2,6 +2,7 @@ package id.fajarproject.animusic.ui.base
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewbinding.ViewBinding
 import id.fajarproject.animusic.ui.customView.OnItemClickListener
 
 
@@ -9,8 +10,8 @@ import id.fajarproject.animusic.ui.customView.OnItemClickListener
  * Created by Fajar Adi Prasetyo on 05/08/2020.
  */
 
-class BaseHolder(itemView: View, onItemClickListener: OnItemClickListener?) :
-    RecyclerView.ViewHolder(itemView),
+class BaseHolder<B : ViewBinding>(var binding: B, onItemClickListener: OnItemClickListener?) :
+    RecyclerView.ViewHolder(binding.root),
     View.OnClickListener {
     private var onItemClickListener: OnItemClickListener? = null
 
@@ -19,7 +20,7 @@ class BaseHolder(itemView: View, onItemClickListener: OnItemClickListener?) :
     }
 
     init {
-        itemView.setOnClickListener(this)
+        binding.root.setOnClickListener(this)
         this.onItemClickListener = onItemClickListener
     }
 }

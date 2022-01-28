@@ -25,6 +25,7 @@ import id.fajarproject.animusic.data.network.model.MusicItem
 import id.fajarproject.animusic.data.pref.AppPreference
 import id.fajarproject.animusic.data.pref.StoragePreference
 import id.fajarproject.animusic.data.realm.RealmHelper
+import id.fajarproject.animusic.databinding.ActivityHomeBinding
 import id.fajarproject.animusic.service.MediaPlayerContract
 import id.fajarproject.animusic.service.MediaPlayerService
 import id.fajarproject.animusic.service.MediaPlayerService.LocalBinder
@@ -39,8 +40,6 @@ import id.fajarproject.animusic.utils.PlaybackStatus
 import id.fajarproject.animusic.utils.StyleMusic
 import id.fajarproject.animusic.utils.Util
 import io.realm.Realm
-import kotlinx.android.synthetic.main.activity_home.*
-import kotlinx.android.synthetic.main.media_player.*
 import javax.inject.Inject
 
 class HomeActivity : BaseActivity(), HomeContract.View {
@@ -66,10 +65,12 @@ class HomeActivity : BaseActivity(), HomeContract.View {
     private var realm = Realm.getDefaultInstance()
     private var realmHelper: RealmHelper? = null
     private var idMusic = -1
+    private lateinit var homeBinding: ActivityHomeBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_home)
+        homeBinding = ActivityHomeBinding.inflate(layoutInflater)
+        setContentView(homeBinding.root)
         getActivityComponent().inject(this)
         presenter.attach(this)
         setToolbar()
@@ -97,12 +98,12 @@ class HomeActivity : BaseActivity(), HomeContract.View {
     }
 
     override fun setToolbar() {
-        setSupportActionBar(toolbar)
+        setSupportActionBar(homeBinding.toolbar)
     }
 
     override fun setUI() {
         ///// setUI Bottom Navigation
-        nav_view.setOnItemSelectedListener{ item: MenuItem ->
+        homeBinding.navView.setOnItemSelectedListener { item: MenuItem ->
             when (item.itemId) {
                 R.id.action_online -> {
                     addFragment(OnlineFragment(), Constant.online)
@@ -132,8 +133,9 @@ class HomeActivity : BaseActivity(), HomeContract.View {
         setOpenFragment()
 
         ///// setUi SlideLayout
-        slideLayout.panelState = SlidingUpPanelLayout.PanelState.HIDDEN
-        slideLayout.addPanelSlideListener(object : SlidingUpPanelLayout.PanelSlideListener {
+        homeBinding.slideLayout.panelState = SlidingUpPanelLayout.PanelState.HIDDEN
+        homeBinding.slideLayout.addPanelSlideListener(object :
+            SlidingUpPanelLayout.PanelSlideListener {
             override fun onPanelSlide(panel: View?, slideOffset: Float) {
             }
 
@@ -147,14 +149,14 @@ class HomeActivity : BaseActivity(), HomeContract.View {
                 ) {
                     setViewExpand()
                 } else {
-                    slideLayout.panelState = SlidingUpPanelLayout.PanelState.HIDDEN
+                    homeBinding.slideLayout.panelState = SlidingUpPanelLayout.PanelState.HIDDEN
                 }
             }
 
         })
-        cvBackground.setOnClickListener {
+        homeBinding.cvBackground.setOnClickListener {
             if (player != null || listMusic != null) {
-                slideLayout.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
+                homeBinding.slideLayout.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
             } else {
                 val storageUtil =
                     StoragePreference(activity)
@@ -172,13 +174,13 @@ class HomeActivity : BaseActivity(), HomeContract.View {
     }
 
     override fun setViewMinimize() {
-        loadingMusic.visibility = View.VISIBLE
-        clActionMinimize.visibility = View.VISIBLE
-        ivMenu.visibility = View.GONE
-        ivDown.visibility = View.GONE
-        cvBackground.visibility = View.VISIBLE
-        judul.gravity = Gravity.CENTER_VERTICAL
-        name.gravity = Gravity.CENTER_VERTICAL
+        homeBinding.loadingMusic.visibility = View.VISIBLE
+        homeBinding.mediaPlayer.clActionMinimize.visibility = View.VISIBLE
+        homeBinding.mediaPlayer.ivMenu.visibility = View.GONE
+        homeBinding.mediaPlayer.ivDown.visibility = View.GONE
+        homeBinding.cvBackground.visibility = View.VISIBLE
+        homeBinding.mediaPlayer.judul.gravity = Gravity.CENTER_VERTICAL
+        homeBinding.mediaPlayer.name.gravity = Gravity.CENTER_VERTICAL
     }
 
     override fun addFragment(fragments: Fragment, tag: String) {
@@ -197,7 +199,7 @@ class HomeActivity : BaseActivity(), HomeContract.View {
             fragmentManager.findFragmentByTag(tag)
         if (fragment == null) {
             fragment = fragments
-            fragmentTransaction.add(container.id, fragment, tag)
+            fragmentTransaction.add(homeBinding.container.id, fragment, tag)
         } else {
             if (tag == Constant.setting) {
                 fragmentTransaction.detach(fragment).attach(fragment)
@@ -214,33 +216,33 @@ class HomeActivity : BaseActivity(), HomeContract.View {
     override fun setOpenFragment() {
         when (AppPreference.getStringPreferenceByName(this, Constant.tag)) {
             Constant.favorite -> {
-                nav_view.selectedItemId = R.id.action_favorite
+                homeBinding.navView.selectedItemId = R.id.action_favorite
             }
             Constant.download -> {
-                nav_view.selectedItemId = R.id.action_download
+                homeBinding.navView.selectedItemId = R.id.action_download
             }
             Constant.setting -> {
-                nav_view.selectedItemId = R.id.action_settings
+                homeBinding.navView.selectedItemId = R.id.action_settings
             }
             else -> {
-                nav_view.selectedItemId = R.id.action_online
+                homeBinding.navView.selectedItemId = R.id.action_online
             }
         }
     }
 
     override fun setViewExpand() {
-        clActionMinimize.visibility = View.GONE
-        ivMenu.visibility = View.VISIBLE
-        ivDown.visibility = View.VISIBLE
-        judul.gravity = Gravity.CENTER
-        name.gravity = Gravity.CENTER
+        homeBinding.mediaPlayer.clActionMinimize.visibility = View.GONE
+        homeBinding.mediaPlayer.ivMenu.visibility = View.VISIBLE
+        homeBinding.mediaPlayer.ivDown.visibility = View.VISIBLE
+        homeBinding.mediaPlayer.judul.gravity = Gravity.CENTER
+        homeBinding.mediaPlayer.name.gravity = Gravity.CENTER
     }
 
     override fun onBackPressed() {
-        if (slideLayout != null && (slideLayout.panelState == SlidingUpPanelLayout.PanelState.EXPANDED ||
-                    slideLayout.panelState == SlidingUpPanelLayout.PanelState.ANCHORED)
+        if (homeBinding.slideLayout.panelState == SlidingUpPanelLayout.PanelState.EXPANDED ||
+            homeBinding.slideLayout.panelState == SlidingUpPanelLayout.PanelState.ANCHORED
         ) {
-            slideLayout.panelState = SlidingUpPanelLayout.PanelState.COLLAPSED
+            homeBinding.slideLayout.panelState = SlidingUpPanelLayout.PanelState.COLLAPSED
         } else {
             if (doubleBackToExitPressedOnce) {
                 moveTaskToBack(true)
@@ -254,26 +256,29 @@ class HomeActivity : BaseActivity(), HomeContract.View {
                 Toast.LENGTH_SHORT
             ).show()
 
-            Handler(Looper.getMainLooper()).postDelayed({ doubleBackToExitPressedOnce = false }, 2000)
+            Handler(Looper.getMainLooper()).postDelayed(
+                { doubleBackToExitPressedOnce = false },
+                2000
+            )
         }
     }
 
     override fun setMusicPlayer(item: MusicItem) {
-        judul.text = item.judulMusic?.replace(".mp3", "")
-        name.text = item.namaBand
+        homeBinding.mediaPlayer.judul.text = item.judulMusic?.replace(".mp3", "")
+        homeBinding.mediaPlayer.name.text = item.namaBand
         Glide.with(activity)
             .load(Constant.BaseUrlImage + item.cover)
             .error(R.drawable.ic_placeholder)
             .placeholder(Util.circleLoading(activity))
             .diskCacheStrategy(DiskCacheStrategy.ALL)
-            .into(ivBackground)
+            .into(homeBinding.mediaPlayer.ivBackground)
 
         Glide.with(activity)
             .load(Constant.BaseUrlImage + item.cover)
             .error(R.drawable.ic_placeholder)
             .placeholder(Util.circleLoading(activity))
             .diskCacheStrategy(DiskCacheStrategy.ALL)
-            .into(ivMinimize)
+            .into(homeBinding.ivMinimize)
 
         // Favorite Music
         idMusic = item.id ?: -1
@@ -305,9 +310,9 @@ class HomeActivity : BaseActivity(), HomeContract.View {
 
     override fun updateProgress() {
         val mCurrentPosition = player?.currentPosition ?: 0
-        sbProgress.setValue(mCurrentPosition.toFloat() / 1000, false)
-        loadingMusic.progress = mCurrentPosition / 1000
-        timeStart.text = Util.getTime(mCurrentPosition.toLong())
+        homeBinding.mediaPlayer.sbProgress.setValue(mCurrentPosition.toFloat() / 1000, false)
+        homeBinding.loadingMusic.progress = mCurrentPosition / 1000
+        homeBinding.mediaPlayer.timeStart.text = Util.getTime(mCurrentPosition.toLong())
         handler?.postDelayed(mRunnable, 50)
     }
 
@@ -329,22 +334,28 @@ class HomeActivity : BaseActivity(), HomeContract.View {
 
     override fun setVolume() {
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        sbVolume.setValueRange(0, audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC), true)
-        sbVolume.setValue(audioManager.getStreamVolume(AudioManager.STREAM_MUSIC).toFloat(), true)
-        sbVolume.setOnPositionChangeListener { _, _, _, _, _, newValue ->
+        homeBinding.mediaPlayer.sbVolume.setValueRange(
+            0,
+            audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
+            true
+        )
+        homeBinding.mediaPlayer.sbVolume.setValue(
+            audioManager.getStreamVolume(AudioManager.STREAM_MUSIC).toFloat(), true
+        )
+        homeBinding.mediaPlayer.sbVolume.setOnPositionChangeListener { _, _, _, _, _, newValue ->
             audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, newValue, 0)
         }
     }
 
     override fun setAction(item: MusicItem) {
-        ivPrevious.setOnClickListener {
+        homeBinding.mediaPlayer.ivPrevious.setOnClickListener {
             if (player != null) {
                 player?.setOnAction(Constant.ACTION_PREVIOUS)
             } else {
                 previousMusic()
             }
         }
-        ivPreviousMM.setOnClickListener {
+        homeBinding.mediaPlayer.ivPreviousMM.setOnClickListener {
             if (player != null) {
                 player?.setOnAction(Constant.ACTION_PREVIOUS)
             } else {
@@ -352,14 +363,14 @@ class HomeActivity : BaseActivity(), HomeContract.View {
             }
         }
 
-        ivNext.setOnClickListener {
+        homeBinding.mediaPlayer.ivNext.setOnClickListener {
             if (player != null) {
                 player?.setOnAction(Constant.ACTION_NEXT)
             } else {
                 nextMusic()
             }
         }
-        ivNextMM.setOnClickListener {
+        homeBinding.mediaPlayer.ivNextMM.setOnClickListener {
             if (player != null) {
                 player?.setOnAction(Constant.ACTION_NEXT)
             } else {
@@ -367,10 +378,10 @@ class HomeActivity : BaseActivity(), HomeContract.View {
             }
         }
 
-        ivStyle.setOnClickListener {
+        homeBinding.mediaPlayer.ivStyle.setOnClickListener {
             player?.setOnAction(Constant.ACTION_STYLE)
         }
-        ivFavorite.setOnClickListener {
+        homeBinding.mediaPlayer.ivFavorite.setOnClickListener {
             if (realmHelper?.checkData(idMusic) != false) {
                 if (player != null)
                     player?.setOnAction(Constant.ACTION_UNLIKE)
@@ -422,13 +433,28 @@ class HomeActivity : BaseActivity(), HomeContract.View {
     override fun styleIcon(styleMusic: Int) {
         when (styleMusic) {
             StyleMusic.LOOPING -> {
-                ivStyle.setImageDrawable(ContextCompat.getDrawable(activity, R.drawable.ic_looping))
+                homeBinding.mediaPlayer.ivStyle.setImageDrawable(
+                    ContextCompat.getDrawable(
+                        activity,
+                        R.drawable.ic_looping
+                    )
+                )
             }
             StyleMusic.RANDOM -> {
-                ivStyle.setImageDrawable(ContextCompat.getDrawable(activity, R.drawable.ic_random))
+                homeBinding.mediaPlayer.ivStyle.setImageDrawable(
+                    ContextCompat.getDrawable(
+                        activity,
+                        R.drawable.ic_random
+                    )
+                )
             }
             StyleMusic.REPEAT -> {
-                ivStyle.setImageDrawable(ContextCompat.getDrawable(activity, R.drawable.ic_repeat))
+                homeBinding.mediaPlayer.ivStyle.setImageDrawable(
+                    ContextCompat.getDrawable(
+                        activity,
+                        R.drawable.ic_repeat
+                    )
+                )
             }
         }
     }
@@ -441,7 +467,7 @@ class HomeActivity : BaseActivity(), HomeContract.View {
                     AudioManager.ADJUST_RAISE,
                     AudioManager.FLAG_PLAY_SOUND or AudioManager.FLAG_SHOW_UI
                 )
-                sbVolume.setValue(
+                homeBinding.mediaPlayer.sbVolume.setValue(
                     audioManager.getStreamVolume(AudioManager.STREAM_MUSIC).toFloat(),
                     true
                 )
@@ -453,7 +479,7 @@ class HomeActivity : BaseActivity(), HomeContract.View {
                     AudioManager.ADJUST_LOWER,
                     AudioManager.FLAG_PLAY_SOUND or AudioManager.FLAG_SHOW_UI
                 )
-                sbVolume.setValue(
+                homeBinding.mediaPlayer.sbVolume.setValue(
                     audioManager.getStreamVolume(AudioManager.STREAM_MUSIC).toFloat(),
                     true
                 )
@@ -515,7 +541,7 @@ class HomeActivity : BaseActivity(), HomeContract.View {
             sendBroadcast(broadcastIntent)
             setCallBackMusic()
         }
-        slideLayout.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
+        homeBinding.slideLayout.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
     }
 
     override fun setCallBackMusic() {
@@ -523,12 +549,22 @@ class HomeActivity : BaseActivity(), HomeContract.View {
 
             override fun onPrepared() {
                 val duration = player?.duration ?: 0
-                sbProgress.setValueRange(0, duration / 1000, false)
-                loadingMusic.max = duration / 1000
-                timeEnd.text = Util.getTime(duration.toLong())
+                homeBinding.mediaPlayer.sbProgress.setValueRange(0, duration / 1000, false)
+                homeBinding.loadingMusic.max = duration / 1000
+                homeBinding.mediaPlayer.timeEnd.text = Util.getTime(duration.toLong())
                 updateProgress()
-                ivPlay.setImageDrawable(ContextCompat.getDrawable(activity, R.drawable.ic_pause))
-                ivPlayMM.setImageDrawable(ContextCompat.getDrawable(activity, R.drawable.ic_pause))
+                homeBinding.mediaPlayer.ivPlay.setImageDrawable(
+                    ContextCompat.getDrawable(
+                        activity,
+                        R.drawable.ic_pause
+                    )
+                )
+                homeBinding.mediaPlayer.ivPlayMM.setImageDrawable(
+                    ContextCompat.getDrawable(
+                        activity,
+                        R.drawable.ic_pause
+                    )
+                )
             }
 
             override fun onComplete() {
@@ -541,13 +577,13 @@ class HomeActivity : BaseActivity(), HomeContract.View {
             override fun onAction(playbackStatus: PlaybackStatus) {
                 when (playbackStatus) {
                     PlaybackStatus.PAUSED -> {
-                        ivPlay.setImageDrawable(
+                        homeBinding.mediaPlayer.ivPlay.setImageDrawable(
                             ContextCompat.getDrawable(
                                 activity,
                                 R.drawable.ic_play
                             )
                         )
-                        ivPlayMM.setImageDrawable(
+                        homeBinding.mediaPlayer.ivPlayMM.setImageDrawable(
                             ContextCompat.getDrawable(
                                 activity,
                                 R.drawable.ic_play
@@ -558,13 +594,13 @@ class HomeActivity : BaseActivity(), HomeContract.View {
                     PlaybackStatus.PLAYING -> {
                         updateProgress()
                         anim?.resume()
-                        ivPlay.setImageDrawable(
+                        homeBinding.mediaPlayer.ivPlay.setImageDrawable(
                             ContextCompat.getDrawable(
                                 activity,
                                 R.drawable.ic_pause
                             )
                         )
-                        ivPlayMM.setImageDrawable(
+                        homeBinding.mediaPlayer.ivPlayMM.setImageDrawable(
                             ContextCompat.getDrawable(
                                 activity,
                                 R.drawable.ic_pause
@@ -586,7 +622,7 @@ class HomeActivity : BaseActivity(), HomeContract.View {
 
         })
 
-        sbProgress.setOnPositionChangeListener { _, fromUser, _, _, _, newValue ->
+        homeBinding.mediaPlayer.sbProgress.setOnPositionChangeListener { _, fromUser, _, _, _, newValue ->
             if (fromUser) {
                 val runnable = Runnable {
                     if (player != null) {
@@ -602,16 +638,26 @@ class HomeActivity : BaseActivity(), HomeContract.View {
 
     override fun setIconLike(likeType: String) {
         if (likeType == Constant.ACTION_LIKE) {
-            ivFavorite.setImageDrawable(ContextCompat.getDrawable(activity, R.drawable.ic_like))
+            homeBinding.mediaPlayer.ivFavorite.setImageDrawable(
+                ContextCompat.getDrawable(
+                    activity,
+                    R.drawable.ic_like
+                )
+            )
         } else {
-            ivFavorite.setImageDrawable(ContextCompat.getDrawable(activity, R.drawable.ic_unlike))
+            homeBinding.mediaPlayer.ivFavorite.setImageDrawable(
+                ContextCompat.getDrawable(
+                    activity,
+                    R.drawable.ic_unlike
+                )
+            )
         }
     }
 
     override fun setImageRotate() {
         if (anim != null) anim?.cancel()
         anim =
-            ObjectAnimator.ofFloat(ivMinimize, View.ROTATION, 0f, 360f)
+            ObjectAnimator.ofFloat(homeBinding.ivMinimize, View.ROTATION, 0f, 360f)
                 .setDuration(15000)
         anim?.repeatCount = Animation.INFINITE
         anim?.interpolator = LinearInterpolator()
